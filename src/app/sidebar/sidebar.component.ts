@@ -36,7 +36,7 @@ export const ROUTESADM: RouteInfo[] = [
   // },
   {
     path: "/generarCBR",
-    title: "Generar Codigo",
+    title: "Reportes",
     icon: "nc-credit-card",
     class: "",
   },
@@ -51,30 +51,23 @@ export const ROUTESUSUARIO: RouteInfo[] = [
     icon: "nc-icon nc-album-2",
     class: "",
   },
-  { path: "/clientes", title: "Clientes", icon: "nc-single-02", class: "" },
   {
     path: "/productos",
     title: "Productos",
     icon: "nc-icon nc-tag-content",
     class: "",
-  },
-  {
-    path: "/generarCBR",
-    title: "Generar Codigo",
-    icon: "nc-tile-56",
-    class: "",
-  } 
-];
-
-export const ROUTESCLIENTE: RouteInfo[] = [
-  { path: "/dashboard", title: "Inicio", icon: "nc-bank", class: "" },
-  {
-    path: "/generarCBR",
-    title: "Generar Codigo",
-    icon: "nc-tile-56",
-    class: "",
   }
 ];
+
+// export const ROUTESCLIENTE: RouteInfo[] = [
+//   { path: "/dashboard", title: "Inicio", icon: "nc-bank", class: "" },
+//   {
+//     path: "/generarCBR",
+//     title: "Generar Codigo",
+//     icon: "nc-tile-56",
+//     class: "",
+//   }
+// ];
 
 @Component({
   moduleId: module.id,
@@ -90,7 +83,7 @@ export class SidebarComponent implements OnInit {
       case "Admin":
         this.menuItems = ROUTESADM.filter((menuItem) => menuItem);
         break;
-      case "User":
+      case "Client":
         this.menuItems = ROUTESUSUARIO.filter((menuItem) => menuItem);
         break;
     }

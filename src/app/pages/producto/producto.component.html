@@ -15,145 +15,75 @@
           </button>
         </div>
       </div>
-      <div class="card-body">
-        <div class="table-responsive table-dark table-striped">
-          <table
-            id="producto-table"
-            datatable
-            [dtOptions]="dtOptionsP"
-            class="row-border hover"
-          ></table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Modal -->
-<div
-  class="modal fade"
-  id="exampleModalProducto"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="exampleModalLabel"
-  aria-hidden="true"
->
+      <!-- Agregar producto Modal -->
+<div class="modal fade" id="exampleModalProducto" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Producto</h5>
-        <button
-          type="button"
-          class="close"
-          data-dismiss="modal"
-          aria-label="Close"
-        >
+        <h5 class="modal-title" id="exampleModalLabel">Agregar Producto</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+
       <div class="modal-body">
-        <div class="row">
-          <div class="col-md-6 pr-1">
+        <!-- Formulario para agregar un nuevo producto -->
+        <form (ngSubmit)="GuardarProducto()" #agregarForm="ngForm">
+          <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="producto.nombre" required>
+          </div>
+          <div class="form-group">
+            <label for="codigo">Código</label>
+            <input type="text" class="form-control" id="codigo" name="codigo" [(ngModel)]="producto.codigo" required>
+          </div>
+          <div class="form-group">
+            <label for="precio">Precio</label>
+            <input type="number" class="form-control" id="precio" name="precio" [(ngModel)]="producto.precio" required>
+          </div>
+          <div class="form-group">
+            <label>Categoría</label>
+            <div class="dropdown">
+              <button class="btn btn-outline-dark dropdown-toggle" type="button" id="categoriaDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ producto.categoria === 1 ? 'General' : 'Carnes' }}
+              </button>
+              <div class="dropdown-menu" aria-labelledby="categoriaDropdown">
+                <a class="dropdown-item" (click)="selectCategoria(1)">General</a>
+                <a class="dropdown-item" (click)="selectCategoria(2)">Carnes</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 pr-1" *ngIf="producto.categoria == 2">
             <div class="form-group">
-              <label>Nombre</label>
+              <label>Peso</label>
               <input
-                name="txtNombre"
+                name="txtPeso"
+                min="0"
                 class="form-control"
-                type="text"
-                maxlength="40"
-                placeholder="Ingrese el nombre..."
-                [(ngModel)] = "producto.nombre"
+                id="txtPeso"
+                type="number"
+                maxlength="6"
+                [(ngModel)]="producto.peso"
               />
             </div>
           </div>
-          <div class="col-md-6 px-1">
-            <div class="form-group">
-              <label>Código</label>
-              <input
-                name="txtCodigo"
-                class="form-control"
-                type="text"
-                maxlength="13"
-                pattern="[0-9]{13}"
-                [(ngModel)] = "producto.codigo"
-                placeholder="Ingrese el código..."
-                (keydown)="onCodigoKeyDown($event)" 
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6 pr-1">
-            <div class="form-group">
-              <label>Precio</label>
-                <input
-                  name="txtPrecio"
-                  min="0"
-                  class="form-control"
-                  id="txtPrecio"
-                  oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
-                  type="number"
-                  maxlength="6"
-                  [(ngModel)] = "producto.precio"
-                />
-            </div>
-          </div>
-          <div class="row">
-          </div>
-        </div>
-
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-md-6 pr-1">
-              <div class="form-group">
-                <label>Categoría</label>
-                <div class="dropdown">
-                  <button class="btn btn-outline-dark dropdown-toggle" type="button" id="categoriaDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{ producto.categoria === 1 ? 'General' : 'Carnes' }}
-                  </button>
-                  <div class="dropdown-menu" aria-labelledby="categoriaDropdown">
-                    <a class="dropdown-item" (click)="selectCategoria(1)">General</a>
-                    <a class="dropdown-item" (click)="selectCategoria(2)">Carnes</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-              <div class="col-md-6 pr-1" *ngIf="producto.categoria == 2">
-                <div class="form-group">
-                  <label>Peso</label>
-                  <input
-                    name="txtPeso"
-                    min="0"
-                    class="form-control"
-                    id="txtPeso"
-                    type="number"
-                    maxlength="6"
-                    [(ngModel)]="producto.peso"
-                  />
-                </div>
-              </div>
+          <div class="form-group">
+            <label>Imagen</label>
+            <file-pond
+              #myPond
+              [options]="pondOptions"
+              [files]="pondFiles"
+              (oninit)="pondHandleInit()"
+              (onaddfile)="pondHandleAddFile($event)"
+            >
+            </file-pond>
           </div>
 
-        <div class="row">
-          <div class="col-md-12 pr-1">
-            <div class="form-group">
-              <label>Imagen</label>
-              <file-pond
-                #myPond
-                [options]="pondOptions"
-                [files]="pondFiles"
-                (oninit)="pondHandleInit()"
-                (onaddfile)="pondHandleAddFile($event)"
-              >
-              </file-pond>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- #closeModalProducto -->
+
+          <!-- #closeModalProducto -->
       <div class="modal-footer">
+        
         <button
           type="button"
           #closeModalProducto
@@ -163,6 +93,7 @@
           Cancelar
         </button>
         <button
+        
           type="button"
           (click)="GuardarProducto()"
           class="btn btn-primary"
@@ -176,6 +107,77 @@
           <div class="spinner-border" role="status">
             <span class="sr-only">Loading...</span>
           </div>
+        </div>
+      </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center mt-4">
+  <div class="col-md-6">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Buscar producto..." [(ngModel)]="searchTerm" (ngModelChange)="buscarProductos()">
+      <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button">Buscar</button>
+      </div>
+    </div>
+  </div>  
+</div>
+
+      <div class="card-body">
+        <div class="table-responsive table-striped">
+          <table class="table">
+            <thead class="text-primary">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Imagen</th>
+                <th>Precio</th>
+                <th>Código</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>Opciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- <tr *ngFor="let producto of productos"> -->
+                <tr *ngFor="let producto of filteredProductos">
+                <td>{{ producto.ID }}</td>
+                <td>{{ producto.Nombre }}</td>
+                <td><img [src]="producto.ImgUrl" width="120" height="120" class="rounded mx-auto d-block" alt="No se puede mostrar la imagen"></td>
+                <td>{{ producto.Precio | currency }}</td>
+                <td>{{ producto.Codigo }}</td>
+                <td>{{ producto.ID_CAT === 1 ? 'General' : 'Carnes' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="producto.Estado === 1 ? 'bg-info' : 'bg-danger'">
+                    {{ producto.Estado === 1 ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    id="EditarProducto"
+                    type="button"
+                    class="btn btn-info btn-sm"
+                    data-toggle="modal"
+                    data-target="#exampleModalProducto"
+                    (click)="EditarProducto(producto)"
+                  >
+                    <i class="nc-icon nc-bullet-list-67"></i>
+                  </button>
+                  <button
+                    id="EliminarProducto" 
+                    class="btn btn-danger btn-sm"
+                    (click)="EliminarProducto(producto)"
+                  >
+                    <i class="nc-icon nc-simple-remove"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>          
+          
         </div>
       </div>
     </div>

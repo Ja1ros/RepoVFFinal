@@ -9,8 +9,6 @@ export interface IRespCliente {
     CedRuc?: string
     Nombres?: string
     Apellidos?: string
-    Telefono?: string
-    Direccion?: string
     Estado?: number
     Correo?: string
     Contra?: string
@@ -22,8 +20,6 @@ export interface IRespCliente {
     cedula?: string;
     nombres?: string;
     apellidos?: string;
-    direccion?: string;
-    telefono?: string;
     pass?: string;
     estado?: number;
     email?: string;

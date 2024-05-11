@@ -9,6 +9,10 @@ import { Observable } from 'rxjs';
 })
 export class ProductoService {
 
+  deleteProducto(id: number): Observable<IRespProduct> {
+  return this.http.delete<IRespProduct>(`url/${id}`);
+}
+
   constructor(private http:HttpClient) { }
 
   URL = environment.API;
@@ -42,7 +46,7 @@ export class ProductoService {
     return this.http.put<IRespProduct>(this.URL + 'products', producto, {
       headers: this.opt,
     });
-  }
+  }  
 
   uploadImage(file:any){
     const formData = new FormData();

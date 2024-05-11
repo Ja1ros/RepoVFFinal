@@ -1,15 +1,12 @@
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { DataTableDirective } from "angular-datatables";
 import { ToastrService } from "ngx-toastr";
 import { ProductoService } from "../../Services/producto.service";
 import * as filepond from "filepond";
-import {
-  IRequestProduct,
-  RespImgbb,
-  ResponseProduct,
-} from "app/Models/InterfacesProducts";
+import { IRequestProduct, RespImgbb, ResponseProduct } from "app/Models/InterfacesProducts";
 import { IRespProduct } from "../../Models/InterfacesProducts";
 import { IResp } from "app/Models/Interfaces";
+import { NgForm } from '@angular/forms';
+
 
 @Component({
   selector: "app-producto",
@@ -17,13 +14,20 @@ import { IResp } from "app/Models/Interfaces";
 })
 export class ProductoComponent implements OnInit {
   loading: boolean = false;
+  filteredProductos: ResponseProduct[] = [];
   constructor(
     private prodService: ProductoService,
     private toastr: ToastrService,
-  ) {}
+  ) { }
+
+  totalPages: number = 0;
+  pages: number[] = [];
 
   rol: string = "";
-
+  productos: ResponseProduct[] = [];
+  searchTerm: string = '';
+  currentPage: number = 1;
+  itemsPerPage: number = 5;
   producto: IRequestProduct = {
     id: 0,
     nombre: "",
@@ -37,101 +41,42 @@ export class ProductoComponent implements OnInit {
   };
 
   @ViewChild("closeModalProducto") closeModal: ElementRef;
-  
-  @ViewChild(DataTableDirective, { static: false })
-  dtElement: DataTableDirective;
-  dtOptionsP: DataTables.Settings = {};
+  @ViewChild('paginationNav') paginationNav: ElementRef;
 
   ngOnInit(): void {
     this.rol = JSON.parse(localStorage.getItem("rol"));
+    this.loadProductos();
 
-    this.dtOptionsP = {
-      ajax: (dataTablesParameters: any, callback) => {
-        this.prodService.getProductos().subscribe((data) => {
-          callback({ data: data.data });
-        });
-      },
-      language: {
-        url: "https://cdn.datatables.net/plug-ins/1.13.1/i18n/es-ES.json",
-      },
-      columns: [
-        {
-          title: "ID",
-          data: "ID",
-        },
-        {
-          title: "Nombre",
-          data: "Nombre",
-        },
-        {
-          title: "Imagen",
-          data: "ImgUrl",
-          render: function (data) {
-            return `<img src="${data}" width="120" height="120" class="rounded mx-auto d-block" alt="No se puede mostrar la imagen">`;
-          },
-        },
-        {
-          title: "Precio",
-          data: "Precio",
-          render: $.fn.dataTable.render.number(",", ".", 2,"$"),
-          type: "currency",
-        },
-        {
-          title: "Codigo",
-          data: "Codigo",
-        },
-        // {
-        //   title: "Peso",
-        //   data: "Peso",
-        //   render: $.fn.dataTable.render.number(",", ".", 4),          
-        // },
-        // {
-        //   title: "Stock",
-        //   data: "Stock",
-        // },
-        {
-          title: "Categoria",
-          data: "ID_CAT",
-          className: "text-center"
-        },
-      ],
-      columnDefs: [
-        {
-          targets: 6,
-          title: "Estado",
-          data: "Estado",
-          render: function (data, type, row) {
-            return data == 1
-              ? `<span class="badge bg-info">Activo</span>`
-              : `<span class="badge bg-danger">Inactivo</span>`;
-          },
-        },
-        {
-          targets: 7,
-          title: "Opciones",
-          data: null,
-          render: function (data, type, row) {
-            return `<button
-            #Editar
-          id="EditarProducto"
-          type="button"
-          class="btn btn-info btn-sm"
-          data-toggle="modal"
-          data-target="#exampleModalProducto"
-        >
-          <i class="nc-icon nc-bullet-list-67"></i>
-        </button>
+    this.totalPages = Math.ceil(this.productos.length / this.itemsPerPage);
 
-        <button
-          id="EliminarProducto" 
-          class="btn btn-danger btn-sm"
-        >
-          <i class="nc-icon nc-simple-remove"></i>
-        </button>`;
-          },
-        },
-      ],
-    };
+    // Generar las páginas
+    this.generatePages();
+  }
+  generatePages() {
+    this.pages = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      this.pages.push(i);
+    }
+  }
+
+  loadProductos() {
+    this.prodService.getProductos().subscribe((data) => {
+      this.productos = data.data;
+      this.filteredProductos = this.productos.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+    });
+  }
+
+  filterProductsByPage() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.filteredProductos = this.productos.slice(startIndex, endIndex);
+  }
+
+  buscarProductos() {
+    const searchTermLowerCase = this.searchTerm.trim().toLowerCase();
+    this.filteredProductos = this.productos.filter(producto =>
+      producto.Nombre.toLowerCase().includes(searchTermLowerCase)
+    );
   }
 
   onCodigoKeyDown(event: KeyboardEvent) {
@@ -186,23 +131,19 @@ export class ProductoComponent implements OnInit {
   GuardarProducto() {
     this.loading = true;
 
-    //console.log("Valor actual de this.producto.precio:", this.producto.precio);
-    
-     if(!this.validarProducto()){
+    if (!this.validarProducto()) {
       return;
-      }
+    }
 
-      
-    if(this.producto.id==0){
+    if (this.producto.id == 0) {
       if (!this.file) {
         this.showNotification("top", "center", 4, "Ingrese un archivo ");
         return;
       }
-  
+
       this.prodService.uploadImage(this.file).subscribe(
         (data: RespImgbb) => {
           this.producto.img = data.data.url;
-          
           this.SaveProduct(this.producto);
           this.file = undefined;
           this.loading = false;
@@ -218,8 +159,8 @@ export class ProductoComponent implements OnInit {
           this.loading = false;
         }
       );
-    }else{
-      if(this.file){
+    } else {
+      if (this.file) {
         this.prodService.uploadImage(this.file).subscribe(
           (data: RespImgbb) => {
             this.producto.img = data.data.url;
@@ -236,15 +177,13 @@ export class ProductoComponent implements OnInit {
             );
           }
         );
-      }else{
+      } else {
         this.editarP();
       }
     }
-    //console.log("Precio después de la edición y antes de la subida:", this.producto.precio);
   }
 
   SaveProduct(producto: IRequestProduct) {
-    console.log(producto)
     this.prodService.postProducto(producto).subscribe(
       async (data: IRespProduct) => {
         this.producto = {
@@ -258,8 +197,6 @@ export class ProductoComponent implements OnInit {
           codigo: "",
           categoria: 1,
         };
-        this.pondFiles = [];
-        this.myPond.removeFiles()
         await this.reload();
         this.closeModal.nativeElement.click();
         this.showNotification("top", "center", 2, data.msg)
@@ -283,7 +220,6 @@ export class ProductoComponent implements OnInit {
         }
       }
     );
-    console.log(producto)
   }
 
   @ViewChild("myPond") myPond: any;
@@ -341,7 +277,7 @@ export class ProductoComponent implements OnInit {
         break;
       case 3:
         this.toastr.warning(
-          `<span data-notify="icon" class="nc-icon nc-bell-55"></span><span data-notify="message"> ${message}</span>`,
+          `<span data-notify="icon" class="nc-icon nc-bell-55"></span><span data-notify="message">${message}</span>`,
           "",
           {
             timeOut: 4000,
@@ -354,26 +290,13 @@ export class ProductoComponent implements OnInit {
         break;
       case 4:
         this.toastr.error(
-          `<span data-notify="icon" class="nc-icon nc-bell-55"></span><span data-notify="message"> ${message}</span>`,
+          `<span data-notify="icon" class="nc-icon nc-bell-55"></span><span data-notify="message">${message}</span>`,
           "",
           {
             timeOut: 4000,
-            enableHtml: true,
             closeButton: true,
+            enableHtml: true,
             toastClass: "alert alert-danger alert-with-icon",
-            positionClass: "toast-" + from + "-" + align,
-          }
-        );
-        break;
-      case 5:
-        this.toastr.show(
-          `<span data-notify="icon" class="nc-icon nc-bell-55"></span><span data-notify="message"> ${message}</span>`,
-          "",
-          {
-            timeOut: 4000,
-            closeButton: true,
-            enableHtml: true,
-            toastClass: "alert alert-primary alert-with-icon",
             positionClass: "toast-" + from + "-" + align,
           }
         );
@@ -383,35 +306,11 @@ export class ProductoComponent implements OnInit {
     }
   }
 
-  async reload() {
-    let dt = await this.dtElement.dtInstance;
-    dt.ajax.reload();
-  }
-
-  ngAfterViewInit(): void {
-    var _thisDoc = this;
-    $("#producto-table").on("click", "#EditarProducto", function (data) {
-      let datas = $("#producto-table")
-        .DataTable()
-        .row($(this).parents("tr"))
-        .data() as ResponseProduct;
-        console.log(datas)
-     _thisDoc.EditarProducto(datas);
-    });
-
-    $("#producto-table").on("click", "#EliminarProducto", function (data) {
-      let datas = $("#producto-table")
-        .DataTable()
-        .row($(this).parents("tr"))
-        .data() as ResponseProduct;
-      _thisDoc.EliminarProducto(datas);
-    });
-  }
-
   EditarProducto(producto: ResponseProduct) {
+    // Establecer los datos del producto seleccionado en el formulario de edición
     this.producto.id = producto.ID;
     this.producto.nombre = producto.Nombre;
-    this.producto.precio = producto.Precio
+    this.producto.precio = producto.Precio;
     this.producto.peso = producto.Peso;
     this.producto.img = producto.ImgUrl;
     this.producto.stock = producto.Stock;
@@ -419,50 +318,11 @@ export class ProductoComponent implements OnInit {
     this.producto.codigo = producto.Codigo;
     this.producto.categoria = producto.ID_CAT;
 
-    //console.log("Valor actual de producto.precio:", this.producto.precio);
+    // Mostrar el formulario de edición al usuario
+
+    // Al hacer clic en "Guardar" en el formulario de edición, llamar a la función editarP()
   }
 
-  editarP(){
-    this.prodService.putProducto(this.producto).subscribe(
-      async (data: IRespProduct) => {
-        if (data.status == 200) {
-          this.producto = {
-            id: 0,
-            nombre: "",
-            img: "",
-            precio: 0,
-            peso: 1,
-            stock: 1,
-            estado: 1,
-            codigo: "",
-          categoria: 1,
-          };
-          await this.reload();
-          this.closeModal.nativeElement.click(); //<-- here
-          this.myPond.removeFiles()
-          this.showNotification("top", "center", 2, data.msg);
-        }
-      },
-      (err) => {
-        if (err["error"].errors != undefined) {
-          let msg = "";
-          let cant = err["error"].errors.length;
-          for (let index = 0; index < cant; index++) {
-            const element = err["error"].errors[index];
-            if (index + 1 == cant) {
-              msg += element.msg;
-            } else {
-              msg += element.msg + ", ";
-            }
-          }
-          this.showNotification("top", "center", 4, msg);
-        } else {
-          let er: IRespProduct = err["error"];
-          this.showNotification("top", "center", 4, er.msg);
-        }
-      }
-    );
-  }
   EliminarProducto(producto: ResponseProduct) {
     this.producto.id = producto.ID;
     this.producto.nombre = producto.Nombre;
@@ -486,7 +346,7 @@ export class ProductoComponent implements OnInit {
             stock: 1,
             estado: 1,
             codigo: "",
-          categoria: 0,
+            categoria: 0,
           };
           await this.reload();
           //this.closeModal.nativeElement.click(); //<-- here
@@ -512,5 +372,62 @@ export class ProductoComponent implements OnInit {
         }
       }
     );
+  }
+
+  editarP() {
+    // Verificar que los datos del producto sean válidos antes de enviarlos al servidor
+    if (!this.validarProducto()) {
+      return;
+    }
+
+    // Enviar los datos actualizados del producto al servidor
+    this.prodService.putProducto(this.producto).subscribe(
+      async (data: IRespProduct) => {
+        if (data.status === 200) {
+          // Limpiar el formulario después de editar el producto
+          this.producto = {
+            id: 0,
+            nombre: "",
+            img: "",
+            precio: 0,
+            peso: 1,
+            stock: 1,
+            estado: 1,
+            codigo: "",
+            categoria: 1,
+          };
+          // Recargar la lista de productos después de editar uno
+          await this.loadProductos();
+          // Cerrar el formulario de edición
+          this.closeModal.nativeElement.click();
+          this.showNotification("top", "center", 2, data.msg);
+        }
+      },
+      (err) => {
+        // Manejar errores en caso de que ocurran
+        console.error(err);
+        if (err["error"].errors != undefined) {
+          let msg = "";
+          let cant = err["error"].errors.length;
+          for (let index = 0; index < cant; index++) {
+            const element = err["error"].errors[index];
+            if (index + 1 == cant) {
+              msg += element.msg;
+            } else {
+              msg += element.msg + ", ";
+            }
+          }
+          this.showNotification("top", "center", 4, msg);
+        } else {
+          let er: IRespProduct = err["error"];
+          this.showNotification("top", "center", 4, er.msg);
+        }
+      }
+    );
+  }
+
+
+  async reload() {
+    await this.loadProductos();
   }
 }

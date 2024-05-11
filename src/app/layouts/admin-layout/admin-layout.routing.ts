@@ -8,9 +8,6 @@ import { ClienteComponent } from "../../pages/cliente/cliente.component";
 import { UsuarioComponent } from "../../pages/usuario/usuario.component";
 import { ProductoComponent } from "../../pages/producto/producto.component";
 import { Producto2Component } from "../../pages/producto2/producto2.component";
-import { ListaFacturaComponent } from "../../pages/lista-factura/lista-factura.component";
-import { CrearFacturaComponent } from "../../pages/crear-factura/crear-factura.component";
-import { VerFacturaComponent } from "../../pages/ver-factura/ver-factura.component";
 import { MiPerfilComponent } from "../../pages/mi-perfil/mi-perfil.component";
 import { AuthGuard } from "../../Guards/auth.guard";
 import { EditarProductoComponent } from "app/pages/editar-producto/editar-producto.component";
@@ -27,19 +24,14 @@ export const AdminLayoutRoutes: Routes = [
   //{ path: "productos2", canActivate: [AuthGuard], component: Producto2Component },
   {
     path: "crearFactura",
-    canActivate: [AuthGuard],
-    component: CrearFacturaComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "generarCBR",
-    canActivate: [AuthGuard],
-    component: ListaFacturaComponent,
-  },
+    canActivate: [AuthGuard]},
   {
     path: "verFactura/:id",
-    canActivate: [AuthGuard],
-    component: VerFacturaComponent,
-  },
+    canActivate: [AuthGuard]},
   { path: 'editar-producto/:id', component: EditarProductoComponent },
 
   { path: "miperfil", canActivate: [AuthGuard], component: MiPerfilComponent },

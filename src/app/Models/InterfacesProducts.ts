@@ -8,6 +8,10 @@ export interface ResponseProduct {
     Estado?: number;
     Codigo?: string;
     ID_CAT?: number;
+    Created?: Date;
+    Updated?: Date;
+    ContActualizacion?: number;
+
 }
 
 export interface IRespProduct {
@@ -54,6 +58,9 @@ export interface Root {
     Estado?: number
     Codigo?: string
     ID_CAT?: number
+    Created?: Date;
+    Updated?: Date;
+    ContActualizacion?: number;
   }
 
 export interface Data {

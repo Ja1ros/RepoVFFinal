@@ -3,28 +3,22 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ToastrModule } from "ngx-toastr";
 import { HttpClientModule } from '@angular/common/http';
-
+import { PaginationModule } from 'ngx-bootstrap/pagination';
+import { NgxPaginationModule } from 'ngx-pagination';
 import { SidebarModule } from './sidebar/sidebar.module';
 import { FooterModule } from './shared/footer/footer.module';
 import { NavbarModule} from './shared/navbar/navbar.module';
 
-
 import { AppComponent } from './app.component';
 import { AppRoutes } from './app.routing';
-
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 
-import { DataTablesModule } from "angular-datatables";
 import { LoginComponent } from './login/login.component';
-
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProductoComponent } from './pages/producto/producto.component';
 import { Producto2Component } from './pages/producto2/producto2.component';
 import { ClienteComponent } from './pages/cliente/cliente.component';
 import { UsuarioComponent } from './pages/usuario/usuario.component';
-import { ListaFacturaComponent } from './pages/lista-factura/lista-factura.component';
-import { VerFacturaComponent } from './pages/ver-factura/ver-factura.component';
-import { CrearFacturaComponent } from './pages/crear-factura/crear-factura.component';
 import { UsersComponent } from './users/users.component';
 import { MiPerfilComponent } from './pages/mi-perfil/mi-perfil.component';
 // import filepond module
@@ -45,9 +39,6 @@ registerPlugin(FilePondPluginFileValidateType);
     Producto2Component,
     ClienteComponent,
     UsuarioComponent,
-    ListaFacturaComponent,
-    VerFacturaComponent,
-    CrearFacturaComponent,
     UsersComponent,
     MiPerfilComponent,
     EditarProductoComponent,
@@ -57,7 +48,8 @@ registerPlugin(FilePondPluginFileValidateType);
     RouterModule.forRoot(AppRoutes,{
       useHash: false
     }),
-    DataTablesModule,
+    NgxPaginationModule,
+    PaginationModule.forRoot(),
     SidebarModule,
     NavbarModule,
     ToastrModule.forRoot(),

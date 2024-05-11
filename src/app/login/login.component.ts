@@ -106,6 +106,8 @@ export class LoginComponent implements OnInit {
         localStorage.setItem('token',JSON.stringify(token));
         localStorage.setItem('rol',JSON.stringify(usuario.RollName));
         localStorage.setItem('usuario',JSON.stringify(usuario.userName));
+
+        console.log(usuario);
         this.router.navigateByUrl('/dashboard');
         this.loading = false;
       },
