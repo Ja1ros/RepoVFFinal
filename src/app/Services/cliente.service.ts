@@ -20,11 +20,11 @@ export class ClienteService {
     });
   }
 
-  getClientesFac(){
-    return this.http.get<IRespCliente>(this.URL + 'clients/Fac', {
-      headers: this.opt,
-    });
-  }
+  // getClientesFac(){
+  //   return this.http.get<IRespCliente>(this.URL + 'clients/Fac', {
+  //     headers: this.opt,
+  //   });
+  // }
 
   postCliente(cliente:ClienteRequest){
     return this.http.post<IRespCliente>(this.URL + 'clients', cliente, {

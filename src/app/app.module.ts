@@ -27,6 +27,7 @@ import { FilePondModule, registerPlugin } from 'ngx-filepond';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.esm';
 import { EditarProductoComponent } from './pages/editar-producto/editar-producto.component';
 import { CommonModule } from "@angular/common";
+
 registerPlugin(FilePondPluginFileValidateType);
 
 
@@ -44,11 +45,11 @@ registerPlugin(FilePondPluginFileValidateType);
     EditarProductoComponent,
   ],
   imports: [
+    NgxPaginationModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(AppRoutes,{
       useHash: false
     }),
-    NgxPaginationModule,
     PaginationModule.forRoot(),
     SidebarModule,
     NavbarModule,

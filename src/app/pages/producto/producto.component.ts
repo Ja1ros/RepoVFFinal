@@ -10,7 +10,8 @@ import { NgForm } from '@angular/forms';
 
 @Component({
   selector: "app-producto",
-  templateUrl: "./producto.component.html"
+  templateUrl: "./producto.component.html",
+  styleUrls: ["./producto.component.scss"]
 })
 export class ProductoComponent implements OnInit {
   loading: boolean = false;
@@ -22,12 +23,13 @@ export class ProductoComponent implements OnInit {
 
   totalPages: number = 0;
   pages: number[] = [];
-
   rol: string = "";
   productos: ResponseProduct[] = [];
   searchTerm: string = '';
   currentPage: number = 1;
-  itemsPerPage: number = 5;
+  itemsPerPage: number = 10;
+  selectedCategory: string = '';
+
   producto: IRequestProduct = {
     id: 0,
     nombre: "",
@@ -46,25 +48,68 @@ export class ProductoComponent implements OnInit {
   ngOnInit(): void {
     this.rol = JSON.parse(localStorage.getItem("rol"));
     this.loadProductos();
-
-    this.totalPages = Math.ceil(this.productos.length / this.itemsPerPage);
-
-    // Generar las páginas
-    this.generatePages();
   }
+
   generatePages() {
+    this.totalPages = Math.ceil(this.productos.length / this.itemsPerPage);
     this.pages = [];
     for (let i = 1; i <= this.totalPages; i++) {
       this.pages.push(i);
     }
   }
 
+  onNextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.filterProductsByPage();
+    }
+  }
+
+  onPreviousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.filterProductsByPage();
+    }
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.filterProductsByPage();
+  }
+
   loadProductos() {
     this.prodService.getProductos().subscribe((data) => {
       this.productos = data.data;
+      //this.filterByCategory();
       this.filteredProductos = this.productos.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+      this.generatePages();
     });
   }
+
+  filterByCategory() {
+    if (this.selectedCategory === '') {
+      // Si no se ha seleccionado ninguna categoría, mostrar todos los productos paginados
+      this.filteredProductos = this.productos.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+    } else {
+      // Filtrar los productos por categoría
+      const filteredByCategory = this.productos.filter(producto => producto.ID_CAT === parseInt(this.selectedCategory));
+      // Aplicar paginación a los productos filtrados por categoría
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+      this.filteredProductos = filteredByCategory.slice(startIndex, endIndex);
+    }
+  }
+
+  // filterByCategory() {
+  //   if (this.selectedCategory === '') {
+  //     this.filteredProductos = this.productos;
+  //   } else {
+  //     // Filtrar los productos por categoría seleccionada
+  //     this.filteredProductos = this.productos.filter(producto => producto.ID_CAT === parseInt(this.selectedCategory));
+  //   }
+  //   this.generatePages(); // Generar las páginas basadas en los productos filtrados
+  //   this.filterProductsByPage(); // Aplicar paginación a los productos filtrados
+  // }
 
   filterProductsByPage() {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
@@ -74,9 +119,22 @@ export class ProductoComponent implements OnInit {
 
   buscarProductos() {
     const searchTermLowerCase = this.searchTerm.trim().toLowerCase();
-    this.filteredProductos = this.productos.filter(producto =>
-      producto.Nombre.toLowerCase().includes(searchTermLowerCase)
-    );
+    if (searchTermLowerCase === '') {
+      if (this.selectedCategory !== '') {
+        this.filterByCategory();
+      } else {
+        this.filteredProductos = this.productos.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage); // Si no hay término de búsqueda ni categoría, no mostrar ningún producto
+      }
+    } else {
+      this.filteredProductos = this.productos.filter(producto =>
+        producto.Nombre.toLowerCase().includes(searchTermLowerCase)
+      );
+    }
+  }
+  
+  limpiarBusqueda() {
+    this.searchTerm = ''; 
+    this.buscarProductos(); 
   }
 
   onCodigoKeyDown(event: KeyboardEvent) {
@@ -125,7 +183,19 @@ export class ProductoComponent implements OnInit {
   }
 
   selectCategoria(categoriaId: number) {
-    this.producto.categoria = categoriaId;
+    this.selectedCategory = categoriaId.toString(); // Actualizar la categoría seleccionada
+  this.filterByCategory();
+  }
+
+  getCategoriaNombre(categoriaId: number): string {
+    switch (categoriaId) {
+      case 1: return 'Legumbres';
+      case 2: return 'Carnes';
+      case 3: return 'Hogar C';
+      case 4: return 'Abastos';
+      case 5: return 'Hogar A';
+      default: return 'Desconocido';
+    }
   }
 
   GuardarProducto() {

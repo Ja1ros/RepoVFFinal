@@ -15,7 +15,10 @@ export const ROUTESADM: RouteInfo[] = [
     icon: "nc-icon nc-badge",
     class: "",
   },
-  { path: "/clientes", title: "Colaboradores", icon: "nc-single-02", class: "" },
+  { path: "/clientes", 
+    title: "Colaboradores", 
+    icon: "nc-single-02", 
+    class: "" },
   {
     path: "/usuarios",
     title: "Usuarios",
@@ -34,12 +37,12 @@ export const ROUTESADM: RouteInfo[] = [
   //   icon: "nc-icon nc-tag-content",
   //   class: "",
   // },
-  {
-    path: "/generarCBR",
-    title: "Reportes",
-    icon: "nc-credit-card",
-    class: "",
-  },
+  // {
+  //   path: "/generarCBR",
+  //   title: "Reportes",
+  //   icon: "nc-credit-card",
+  //   class: "",
+  // },
   
 ];
 
@@ -54,7 +57,7 @@ export const ROUTESUSUARIO: RouteInfo[] = [
   {
     path: "/productos",
     title: "Productos",
-    icon: "nc-icon nc-tag-content",
+    icon: "nc-icon nc-align-center",
     class: "",
   }
 ];
