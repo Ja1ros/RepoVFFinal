@@ -16,7 +16,7 @@ export class ClienteComponent implements OnInit {
   ) {}
 
   loading: boolean = false;
-
+  showPassword: boolean = false;
   clientes: ICliente[] = [];
   filteredClientes: ICliente[] = [];
   totalPages: number = 0;
@@ -81,6 +81,24 @@ export class ClienteComponent implements OnInit {
       cliente.CedRuc.toLowerCase().includes(searchTermLowerCase)
     );
     this.currentPage = 1; // Restablecer la página actual después de la búsqueda
+  }
+
+  validateCedula(event: any) {
+    const input = event.target;
+    if (input.value.length > 10) {
+      input.value = input.value.slice(0, 10);
+    }
+    input.value = input.value.replace(/[^0-9]/g, '');
+  } 
+
+  preventNumbers(event: KeyboardEvent) {
+    if (event.key >= '0' && event.key <= '9') {
+      event.preventDefault();
+    }
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   EditarCliente(cliente: ICliente) {

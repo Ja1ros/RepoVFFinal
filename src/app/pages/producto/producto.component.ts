@@ -80,12 +80,12 @@ export class ProductoComponent implements OnInit {
   loadProductos() {
     this.prodService.getProductos().subscribe((data) => {
       this.productos = data.data;
-      //this.filterByCategory();
-      this.filteredProductos = this.productos.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+      this.filteredProductos = [...this.productos]; // Al cargar inicialmente, no filtramos nada.
       this.generatePages();
+      this.filterProductsByPage(); // Paginamos los productos cargados.
     });
   }
-
+  
   filterByCategory() {
     if (this.selectedCategory === '') {
       // Si no se ha seleccionado ninguna categoría, mostrar todos los productos paginados
@@ -99,17 +99,6 @@ export class ProductoComponent implements OnInit {
       this.filteredProductos = filteredByCategory.slice(startIndex, endIndex);
     }
   }
-
-  // filterByCategory() {
-  //   if (this.selectedCategory === '') {
-  //     this.filteredProductos = this.productos;
-  //   } else {
-  //     // Filtrar los productos por categoría seleccionada
-  //     this.filteredProductos = this.productos.filter(producto => producto.ID_CAT === parseInt(this.selectedCategory));
-  //   }
-  //   this.generatePages(); // Generar las páginas basadas en los productos filtrados
-  //   this.filterProductsByPage(); // Aplicar paginación a los productos filtrados
-  // }
 
   filterProductsByPage() {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
@@ -182,9 +171,15 @@ export class ProductoComponent implements OnInit {
     return true;
   }
 
-  selectCategoria(categoriaId: number) {
+  selectCategoriaL(categoriaId: number) {
     this.selectedCategory = categoriaId.toString(); // Actualizar la categoría seleccionada
-  this.filterByCategory();
+    this.filterByCategory();
+  }
+
+  selectCategoria(categoriaId: number) {
+    this.producto.categoria = categoriaId;
+    this.selectedCategory = categoriaId.toString(); // Actualizar la categoría seleccionada
+    this.filterByCategory();
   }
 
   getCategoriaNombre(categoriaId: number): string {
@@ -202,12 +197,14 @@ export class ProductoComponent implements OnInit {
     this.loading = true;
 
     if (!this.validarProducto()) {
+      this.loading = false;
       return;
     }
 
     if (this.producto.id == 0) {
       if (!this.file) {
         this.showNotification("top", "center", 4, "Ingrese un archivo ");
+        this.loading = false;
         return;
       }
 
